@@ -185,7 +185,7 @@ Message: 'msedgedriver.exe' executable needs to be available in the path.
 ### 调试模式
 ```bash
 # 查看详细日志
-python Rewards.py --device pc --count 5
+Rewards.py --device pc --count 5
 ```
 
 ## 📞 技术支持
