@@ -55,7 +55,7 @@ Rewards.py --device pc --count 40 --headless
 
 **使用方法**：
 ```bash
-双击打开
+双击或者用cmd打开
 ```
 
 **使用场景**：
@@ -73,7 +73,7 @@ Rewards.py --device pc --count 40 --headless
 
 **使用方法**：
 ```bash
-双击打开
+双击或者用cmd打开
 ```
 
 ### 4. 浏览器Cookie仿正常用户.py - 高级浏览器自动化
@@ -87,7 +87,7 @@ Rewards.py --device pc --count 40 --headless
 
 **使用方法**：
 ```bash
-双击打开
+双击或者用cmd打开
 ```
 
 ## 📂 数据文件说明
@@ -200,8 +200,8 @@ python Rewards.py --device pc --count 5
 
 ## 📄 许可证
 
-本项目仅供学习和研究使用，请使用完脚本以后立马删除加清除记忆。
-[懂我意思吧hhh]
+本项目仅供学习和研究使用，请使用完脚本以后立马删除加清除记忆。[懂我意思吧hhh]
+
 ---
 
 **最后提醒**：请务必确保您的 `msedgedriver.exe` 与Edge浏览器版本匹配，这是脚本正常运行的关键！
