@@ -4,6 +4,9 @@
 
 本项目包含多个Python自动化脚本，专门用于Rewards积分获取。
 
+[RewardsPlus](https://github.com/Little114/Rewards-Plus)现已加入RewardsScript
+**！！！！**
+
 **应该是最方便最简单的刷微软积分的脚本了!!!!!!!!!!!!**
 
 ## 🚨 重要提醒
