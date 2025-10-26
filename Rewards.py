@@ -20,37 +20,38 @@ KEYWORDS_PC = [
     "Budget headphones", "Furniture sales", "Electronics deals", "Black Friday 2025",
     "Amazon best sellers", "Tech gadgets 2025", "Winter clothing trends", "Jewelry gift ideas",
     
+
     "Top travel destinations", "Cheap flights 2025", "Hotel booking tips", "Beach vacation ideas",
     "City break Europe", "Adventure travel packages", "Cruise deals 2025", "Travel insurance comparison",
     "Camping gear reviews", "Best hiking trails", "Family vacation spots", "Solo travel tips",
     "Backpacking destinations", "Luxury resorts Asia", "Travel safety tips", "Road trip ideas",
     
-  
+
     "Breaking news today", "World news updates", "US election 2025", "Global economy trends",
     "Climate change solutions", "Political debates 2025", "International conflicts", "Tech industry updates",
     "Stock market predictions", "Health policy news", "Space mission updates", "Energy crisis 2025",
     
- 
+
     "Online courses free", "Best coding bootcamps", "Study abroad programs", "Scholarship opportunities",
     "Academic research tools", "Math learning apps", "History documentaries", "Science podcasts",
     "University rankings 2025", "Career training programs", "Language learning tips", "STEM resources",
     
-   
+
     "Weight loss diets", "Home workout routines", "Mental health tips", "Meditation apps",
     "Healthy meal plans", "Fitness equipment reviews", "Yoga for beginners", "Nutrition supplements",
     "Running shoes reviews", "Stress management techniques", "Sleep improvement tips", "Vegan recipes easy",
     
-   
+
     "New movie releases", "TV show reviews 2025", "Music festivals 2025", "Book recommendations",
     "Streaming service deals", "Celebrity news today", "Top video games 2025", "Art exhibitions",
     "Theater shows 2025", "Pop music charts", "Comedy specials Netflix", "Cultural events near me",
     
-   
+
     "Smart home devices 2025", "Wearable tech reviews", "Electric car prices", "AI innovations",
     "5G network updates", "Virtual reality headsets", "Drone technology", "Cybersecurity tips",
     "Tech startups 2025", "Cloud storage comparison", "Programming tutorials", "Data privacy laws",
     
-  
+
     "Local weather forecast", "Event planning ideas", "DIY craft projects", "Pet adoption near me",
     "Gardening for beginners", "Car maintenance tips", "Home renovation ideas", "Wedding planning guide",
     "Photography gear reviews", "Best coffee machines", "Restaurant reviews near me", "Online grocery delivery",
@@ -88,7 +89,7 @@ KEYWORDS_MOBILE = [
 
 class BingSearchAutomation:
     def __init__(self, device_type="pc", headless=False, driver_path="msedgedriver.exe", user_data_dir=None, mode="search"):
-     
+
         self.device_type = device_type
         self.headless = headless
         self.driver_path = driver_path
@@ -96,23 +97,23 @@ class BingSearchAutomation:
         self.mode = mode
         self.driver = None
         
-       
+
         self.keywords = self.load_keywords_from_file()
     
     def load_keywords_from_file(self):
-      
+
         keywords = []
         try:
             with open("1.txt", "r", encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
-                   
+
                     if line and not line.startswith("#"):
                         keywords.append(line)
             
             if not keywords:
                 print("警告：1.txt文件中没有找到关键词，将使用默认关键词库")
-            
+                
                 return KEYWORDS_PC if self.device_type == "pc" else KEYWORDS_MOBILE
             
             print(f"从1.txt文件成功加载 {len(keywords)} 个关键词")
@@ -126,23 +127,23 @@ class BingSearchAutomation:
             return KEYWORDS_PC if self.device_type == "pc" else KEYWORDS_MOBILE
         
     def setup_driver(self):
-     
+        
         options = webdriver.EdgeOptions()
         
         if self.headless:
             options.add_argument("--headless")
         
-      
+        
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option('useAutomationExtension', False)
         
-      
+        
         options.add_argument("--disable-gpu")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         
-      
+        
         user_data_dir = os.path.join(os.getcwd(), "1", "browser_data")
         options.add_argument(f"--user-data-dir={user_data_dir}")
         
@@ -150,7 +151,7 @@ class BingSearchAutomation:
         options.add_argument("--window-size=1200,800")
         options.add_argument("--window-position=100,100")
         
-      
+        
         user_agents = [
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
@@ -159,7 +160,7 @@ class BingSearchAutomation:
         ]
         options.add_argument(f"--user-agent={random.choice(user_agents)}")
         
-      
+        
         if self.device_type == "mobile":
             mobile_user_agents = [
                 "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36 EdgA/121.0.0.0",
@@ -176,47 +177,47 @@ class BingSearchAutomation:
         service = Service(self.driver_path)
         self.driver = webdriver.Edge(service=service, options=options)
         
-       
+        
         self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
         self.driver.execute_script("Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]})")
         self.driver.execute_script("Object.defineProperty(navigator, 'languages', {get: () => ['zh-CN', 'zh', 'en']})")
         
-      
+        
         self.load_existing_cookies()
         
         return self.driver
     
     def load_existing_cookies(self):
-      
+       
         try:
-         
+            
             cookie_files = glob.glob(os.path.join("1", "final_cookies_*.json"))
             
             if not cookie_files:
                 print("未找到Cookie文件，将创建新的会话")
                 return
             
-          
+            
             latest_cookie_file = max(cookie_files, key=os.path.getmtime)
             print(f"加载Cookie文件: {latest_cookie_file}")
             
-          
+            
             with open(latest_cookie_file, 'r', encoding='utf-8') as f:
                 cookies = json.load(f)
             
-          
+            
             self.driver.get("https://www.bing.com")
             
-         
+            
             for cookie in cookies:
                 try:
-                 
+                    
                     if 'name' in cookie and 'value' in cookie:
                         self.driver.add_cookie(cookie)
                 except Exception as e:
                     print(f"添加Cookie失败: {cookie.get('name', 'unknown')} - {e}")
             
-          
+            
             self.driver.refresh()
             
             print(f"成功加载 {len(cookies)} 个Cookie，登录状态已恢复")
@@ -225,9 +226,9 @@ class BingSearchAutomation:
             print(f"加载Cookie时发生错误: {e}")
     
     def simulate_human_scroll(self, continuous=False):
-      
+        
         try:
-          
+            
             page_height = self.driver.execute_script(
                 "return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, "
                 "document.body.offsetHeight, document.documentElement.offsetHeight, "
@@ -244,30 +245,30 @@ class BingSearchAutomation:
             
             print(f"页面高度: {page_height}px, 当前位置: {current_position}px, 视口高度: {viewport_height}px")
             
-         
+            
             target_position = max(0, page_height - viewport_height)
             
             if current_position >= target_position:
                 print("页面已经滚动到底部")
                 if continuous:
-                   
+                    
                     print("持续滑动模式：滚动回顶部重新开始")
                     
-                   
+                    
                     scroll_steps = random.randint(3, 6)
                     for step in range(scroll_steps):
                         scroll_distance = -current_position / scroll_steps
                         self.driver.execute_script(f"window.scrollBy(0, {scroll_distance});")
-                        time.sleep(0.05 + random.uniform(0.02, 0.08))  
+                        time.sleep(0.05 + random.uniform(0.02, 0.08)) 
                     
-                 
+                    
                     self.driver.execute_script("window.scrollTo(0, 0);")
                     time.sleep(0.5 + random.uniform(0.2, 0.5))
                     
-                  
+                    
                     current_position = 0
                 else:
-                   
+                    
                     wait_time = 4 + random.uniform(1, 3)
                     print(f"直接等待{wait_time:.1f}秒")
                     time.sleep(wait_time)
@@ -275,66 +276,176 @@ class BingSearchAutomation:
             
             if self.device_type == "mobile":
                
-                print("手机模式：使用优化的简单滚动")
+                print("手机模式：使用优化的平滑滑动")
                 
-               
+                
                 scroll_distance = target_position - current_position
                 
-              
-                steps = max(5, min(15, int(scroll_distance / 200)))  
                 
-                print(f"手机模式：分{steps}步滚动，总距离{scroll_distance}px")
+                smooth_scroll_mobile = """
+                const startY = window.pageYOffset || document.documentElement.scrollTop || 0;
+                const targetY = arguments[0];
+                const distance = targetY - startY;
                 
-             
-                for step in range(steps):
-                  
-                    base_step_distance = scroll_distance / steps
-                    
-                   
-                    random_factor = random.uniform(0.8, 1.2)
-                    step_distance = base_step_distance * random_factor
-                    
-                 
-                    self.driver.execute_script(f"window.scrollBy(0, {step_distance});")
-                    
-                  
-                    base_delay = 0.08 + random.uniform(0.02, 0.05)
-                    
-                   
-                    delay_variation = random.uniform(-0.02, 0.03)
-                    actual_delay = max(0.05, base_delay + delay_variation)
-                    
-                    time.sleep(actual_delay)
-                    
-                    
-                    if random.random() < 0.25 and step < steps - 2: 
-                        pause_time = random.uniform(0.1, 0.3)
-                        time.sleep(pause_time)
-                        print("  随机暂停浏览...")
                 
-               
-                final_offset = random.randint(-10, 10) 
-                final_position = max(0, min(target_position + final_offset, page_height - viewport_height))
-                self.driver.execute_script(f"window.scrollTo(0, {final_position});")
+                const baseDuration = 1200; 
+                const distanceFactor = Math.min(distance / 800, 2.5); 
+                const randomFactor = Math.random() * 0.3 + 0.85; 
+                const duration = (baseDuration + (distanceFactor * 300)) * randomFactor;
                 
-              
-                base_wait_time = 3.5
-                wait_variation = random.uniform(0.5, 1.5)
+                const startTime = performance.now();
+                
+                
+                const easeFunctions = [
+                    function easeOutCubic(t) { return (--t) * t * t + 1; },
+                    function easeOutQuad(t) { return t * (2 - t); },
+                    function easeOutExpo(t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); },
+                    function easeInOutSine(t) { return -(Math.cos(Math.PI * t) - 1) / 2; }
+                ];
+                
+                const selectedEase = easeFunctions[Math.floor(Math.random() * easeFunctions.length)];
+                
+                function scrollStep(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    
+                    const currentY = startY + distance * selectedEase(progress);
+                    window.scrollTo(0, currentY);
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(scrollStep);
+                    }
+                }
+                
+                requestAnimationFrame(scrollStep);
+                """
+                
+                
+                self.driver.execute_script(smooth_scroll_mobile, target_position)
+                
+                
+                base_wait_time = 2.0
+                wait_variation = random.uniform(0.3, 1.2)  
                 wait_time = base_wait_time + wait_variation
-                print(f"滚动完成，等待{wait_time:.1f}秒...")
+                print(f"手机端平滑滑动完成，等待{wait_time:.1f}秒...")
                 time.sleep(wait_time)
                 
+                
+                max_attempts = 3
+                for attempt in range(max_attempts):
+                    
+                    current_info = self.driver.execute_script("""
+                        const scrollTop = (document.scrollingElement || document.documentElement).scrollTop || 0;
+                        const scrollHeight = document.body.scrollHeight || document.documentElement.scrollHeight;
+                        const clientHeight = document.documentElement.clientHeight || window.innerHeight;
+                        const distanceToBottom = scrollHeight - scrollTop - clientHeight;
+                        
+                        return {
+                            scrollTop: scrollTop,
+                            scrollHeight: scrollHeight,
+                            clientHeight: clientHeight,
+                            distanceToBottom: distanceToBottom,
+                            isAtBottom: distanceToBottom <= 50  
+                        };
+                    """)
+                    
+                    print(f"验证滑动结果 - 尝试 {attempt + 1}/{max_attempts}:")
+                    print(f"  当前位置: {current_info['scrollTop']}px")
+                    print(f"  页面高度: {current_info['scrollHeight']}px")
+                    print(f"  视口高度: {current_info['clientHeight']}px")
+                    print(f"  距离底部: {current_info['distanceToBottom']}px")
+                    print(f"  是否到达底部: {'是' if current_info['isAtBottom'] else '否'}")
+                    
+                    
+                    if current_info['isAtBottom']:
+                        print("✓ 成功滑动到页面底部")
+                        break
+                    
+                    
+                    if attempt < max_attempts - 1:
+                        print(f"未到达底部，使用备用方案 {attempt + 1}...")
+                        
+                        
+                        if attempt == 0:
+                            
+                            try:
+                                self.driver.execute_script("""
+                                    window.scrollTo({
+                                        top: document.body.scrollHeight || document.documentElement.scrollHeight,
+                                        behavior: 'smooth'
+                                    });
+                                """)
+                                time.sleep(1.5)
+                                print("备用方案1执行成功")
+                            except Exception as e1:
+                                print(f"备用方案1失败: {e1}")
+                        elif attempt == 1:
+                            
+                            try:
+                                self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);")
+                                time.sleep(1.0)
+                                print("备用方案2执行成功")
+                            except Exception as e2:
+                                print(f"备用方案2失败: {e2}")
+                    else:
+                        
+                        print("最后一次尝试：使用最可靠的滚动方案")
+                        try:
+                            
+                            remaining_distance = current_info['distanceToBottom']
+                            steps = max(3, min(10, int(remaining_distance / 200)))
+                            
+                            for step in range(steps):
+                                step_distance = remaining_distance / (steps - step)
+                                self.driver.execute_script(f"window.scrollBy(0, {step_distance});")
+                                time.sleep(0.3 + random.uniform(0.1, 0.3))
+                            
+                            
+                            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);")
+                            time.sleep(0.5)
+                            print("备用方案3执行成功")
+                        except Exception as e3:
+                            print(f"备用方案3失败: {e3}")
+                
+                
+                final_verification = self.driver.execute_script("""
+                    const scrollTop = (document.scrollingElement || document.documentElement).scrollTop || 0;
+                    const scrollHeight = document.body.scrollHeight || document.documentElement.scrollHeight;
+                    const clientHeight = document.documentElement.clientHeight || window.innerHeight;
+                    const distanceToBottom = scrollHeight - scrollTop - clientHeight;
+                    
+                    return distanceToBottom <= 50;
+                """)
+                
+                if final_verification:
+                    print("✓ 最终验证：成功到达页面底部")
+                else:
+                    print("⚠ 最终验证：可能未完全到达底部，但已尽力滑动")
+                    
+                    
+                    final_info = self.driver.execute_script("""
+                        return {
+                            scrollTop: (document.scrollingElement || document.documentElement).scrollTop || 0,
+                            scrollHeight: document.body.scrollHeight || document.documentElement.scrollHeight,
+                            clientHeight: document.documentElement.clientHeight || window.innerHeight
+                        };
+                    """)
+                    print(f"  最终位置: {final_info['scrollTop']}px")
+                    print(f"  页面高度: {final_info['scrollHeight']}px")
+                    print(f"  视口高度: {final_info['clientHeight']}px")
+                
             else:
-              
+                
                 smooth_scroll_pc = """
                 const startY = window.pageYOffset || document.documentElement.scrollTop || 0;
                 const targetY = arguments[0];
                 const distance = targetY - startY;
                 
-               
+                
                 const baseDuration = 1800;
-                const distanceFactor = Math.min(distance / 1000, 3);
-                const randomFactor = Math.random() * 0.4 + 0.8; 
+                const distanceFactor = Math.min(distance / 1000, 3); 
+                const randomFactor = Math.random() * 0.4 + 0.8;
                 const duration = (baseDuration + (distanceFactor * 400)) * randomFactor;
                 
                 const startTime = performance.now();
@@ -369,20 +480,121 @@ class BingSearchAutomation:
                 requestAnimationFrame(scrollStep);
                 """
                 
-               
+                
                 self.driver.execute_script(smooth_scroll_pc, target_position)
                 
-               
+                
                 base_wait_time = 2.5
-                wait_variation = random.uniform(0.5, 2.0) 
+                wait_variation = random.uniform(0.5, 2.0)  
                 wait_time = base_wait_time + wait_variation
                 print(f"PC端平滑滚动完成，等待{wait_time:.1f}秒...")
                 time.sleep(wait_time)
             
             
-            final_position = self.driver.execute_script("return (document.scrollingElement || document.documentElement).scrollTop || 0")
+            max_attempts_pc = 3
+            for attempt in range(max_attempts_pc):
+                
+                current_info = self.driver.execute_script("""
+                    const scrollTop = (document.scrollingElement || document.documentElement).scrollTop || 0;
+                    const scrollHeight = document.body.scrollHeight || document.documentElement.scrollHeight;
+                    const clientHeight = document.documentElement.clientHeight || window.innerHeight;
+                    const distanceToBottom = scrollHeight - scrollTop - clientHeight;
+                    
+                    return {
+                        scrollTop: scrollTop,
+                        scrollHeight: scrollHeight,
+                        clientHeight: clientHeight,
+                        distanceToBottom: distanceToBottom,
+                        isAtBottom: distanceToBottom <= 50  
+                    };
+                """)
+                
+                print(f"PC端验证滑动结果 - 尝试 {attempt + 1}/{max_attempts_pc}:")
+                print(f"  当前位置: {current_info['scrollTop']}px")
+                print(f"  页面高度: {current_info['scrollHeight']}px")
+                print(f"  视口高度: {current_info['clientHeight']}px")
+                print(f"  距离底部: {current_info['distanceToBottom']}px")
+                print(f"  是否到达底部: {'是' if current_info['isAtBottom'] else '否'}")
+                
+                
+                if current_info['isAtBottom']:
+                    print("✓ PC端成功滑动到页面底部")
+                    break
+                
+                
+                if attempt < max_attempts_pc - 1:
+                    print(f"PC端未到达底部，使用备用方案 {attempt + 1}...")
+                    
+                    
+                    if attempt == 0:
+                        
+                        try:
+                            self.driver.execute_script("""
+                                window.scrollTo({
+                                    top: document.body.scrollHeight || document.documentElement.scrollHeight,
+                                    behavior: 'smooth'
+                                });
+                            """)
+                            time.sleep(2.0)
+                            print("PC端备用方案1执行成功")
+                        except Exception as e1:
+                            print(f"PC端备用方案1失败: {e1}")
+                    elif attempt == 1:
+                        
+                        try:
+                            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);")
+                            time.sleep(1.5)
+                            print("PC端备用方案2执行成功")
+                        except Exception as e2:
+                            print(f"PC端备用方案2失败: {e2}")
+                else:
+                    
+                    print("PC端最后一次尝试：使用最可靠的滚动方案")
+                    try:
+                        
+                        remaining_distance = current_info['distanceToBottom']
+                        steps = max(3, min(10, int(remaining_distance / 200)))
+                        
+                        for step in range(steps):
+                            step_distance = remaining_distance / (steps - step)
+                            self.driver.execute_script(f"window.scrollBy(0, {step_distance});")
+                            time.sleep(0.4 + random.uniform(0.1, 0.3))
+                        
+                        
+                        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);")
+                        time.sleep(0.5)
+                        print("PC端备用方案3执行成功")
+                    except Exception as e3:
+                        print(f"PC端备用方案3失败: {e3}")
             
-            print(f"滚动完成，最终位置: {final_position}px，等待5秒...")
+            
+            final_verification_pc = self.driver.execute_script("""
+                const scrollTop = (document.scrollingElement || document.documentElement).scrollTop || 0;
+                const scrollHeight = document.body.scrollHeight || document.documentElement.scrollHeight;
+                const clientHeight = document.documentElement.clientHeight || window.innerHeight;
+                const distanceToBottom = scrollHeight - scrollTop - clientHeight;
+                
+                return distanceToBottom <= 50;
+            """)
+            
+            if final_verification_pc:
+                print("✓ PC端最终验证：成功到达页面底部")
+            else:
+                print("⚠ PC端最终验证：可能未完全到达底部，但已尽力滑动")
+                
+                
+                final_info_pc = self.driver.execute_script("""
+                    return {
+                        scrollTop: (document.scrollingElement || document.documentElement).scrollTop || 0,
+                        scrollHeight: document.body.scrollHeight || document.documentElement.scrollHeight,
+                        clientHeight: document.documentElement.clientHeight || window.innerHeight
+                    };
+                """)
+                print(f"  PC端最终位置: {final_info_pc['scrollTop']}px")
+                print(f"  PC端页面高度: {final_info_pc['scrollHeight']}px")
+                print(f"  PC端视口高度: {final_info_pc['clientHeight']}px")
+            
+            print(f"PC端滑动完成，等待5秒...")
             
             
             time.sleep(5)
@@ -397,7 +609,7 @@ class BingSearchAutomation:
                 print(f"等待{wait_time:.1f}秒后继续滑动...")
                 time.sleep(wait_time)
                 
-               
+                
                 self.simulate_human_scroll(continuous=False)
             
         except Exception as e:
@@ -474,7 +686,7 @@ class BingSearchAutomation:
                 except Exception as e4:
                     print(f"方案4失败: {e4}")
             
-            
+           
             if not backup_success:
                 try:
                     print("尝试方案5：简单滚动")
@@ -493,7 +705,7 @@ class BingSearchAutomation:
                     self.driver.refresh()
                     time.sleep(3)
                     
-                    
+                   
                     self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
                     time.sleep(2)
                     print("页面刷新后滚动成功")
@@ -501,14 +713,14 @@ class BingSearchAutomation:
                     print(f"最终方案也失败: {final_error}")
                     print("使用简单等待方案")
             
-            
+           
             time.sleep(5)
             print("备用方案执行完成")
     
     def bing_search(self, query):
         
         try:
-            
+           
             self.driver.get("https://www.bing.com")
             
             
@@ -528,7 +740,7 @@ class BingSearchAutomation:
             search_box.clear()
             time.sleep(random.uniform(0.1, 0.3))
             
-            
+           
             for i, char in enumerate(query):
                 search_box.send_keys(char)
                 
@@ -549,7 +761,7 @@ class BingSearchAutomation:
             time.sleep(think_time)
             
             
-            if random.random() < 0.3: 
+            if random.random() < 0.3:  
                 try:
                     search_button = self.driver.find_element(By.ID, "search_icon")
                     search_button.click()
@@ -558,21 +770,21 @@ class BingSearchAutomation:
             else:
                 search_box.send_keys(Keys.RETURN)
             
-            
+           
             WebDriverWait(self.driver, 15).until(
                 EC.presence_of_element_located((By.ID, "b_results"))
             )
             
             print(f"搜索完成: {query}")
             
-            
+           
             self.simulate_human_scroll(continuous=False)
             
             return True
             
         except Exception as e:
             print(f"搜索失败: {query} - {e}")
-            
+           
             try:
                 self.driver.refresh()
                 time.sleep(8)
@@ -624,7 +836,7 @@ def main():
     
     args = parser.parse_args()
     
-    
+   
     automation = BingSearchAutomation(
         device_type=args.device,
         headless=args.headless,
@@ -632,10 +844,10 @@ def main():
     )
     
     try:
-        
+       
         automation.setup_driver()
         
-        
+       
         successful_searches = automation.run_searches(args.count)
         
         print(f"\n任务完成！设备类型: {args.device.upper()}")
