@@ -11,47 +11,48 @@ import sys
 import json
 import os
 import glob
+import socket
 
 
 KEYWORDS_PC = [
-
+    
     "Best laptops 2025", "Smartphone deals", "Fashion trends women", "Online shopping discounts",
     "Gaming console prices", "Home appliance reviews", "Sneaker brands", "Luxury watches",
     "Budget headphones", "Furniture sales", "Electronics deals", "Black Friday 2025",
     "Amazon best sellers", "Tech gadgets 2025", "Winter clothing trends", "Jewelry gift ideas",
     
-
+    
     "Top travel destinations", "Cheap flights 2025", "Hotel booking tips", "Beach vacation ideas",
     "City break Europe", "Adventure travel packages", "Cruise deals 2025", "Travel insurance comparison",
     "Camping gear reviews", "Best hiking trails", "Family vacation spots", "Solo travel tips",
     "Backpacking destinations", "Luxury resorts Asia", "Travel safety tips", "Road trip ideas",
     
-
+    
     "Breaking news today", "World news updates", "US election 2025", "Global economy trends",
     "Climate change solutions", "Political debates 2025", "International conflicts", "Tech industry updates",
     "Stock market predictions", "Health policy news", "Space mission updates", "Energy crisis 2025",
     
-
+    
     "Online courses free", "Best coding bootcamps", "Study abroad programs", "Scholarship opportunities",
     "Academic research tools", "Math learning apps", "History documentaries", "Science podcasts",
     "University rankings 2025", "Career training programs", "Language learning tips", "STEM resources",
     
-
+    
     "Weight loss diets", "Home workout routines", "Mental health tips", "Meditation apps",
     "Healthy meal plans", "Fitness equipment reviews", "Yoga for beginners", "Nutrition supplements",
     "Running shoes reviews", "Stress management techniques", "Sleep improvement tips", "Vegan recipes easy",
     
-
+    
     "New movie releases", "TV show reviews 2025", "Music festivals 2025", "Book recommendations",
     "Streaming service deals", "Celebrity news today", "Top video games 2025", "Art exhibitions",
     "Theater shows 2025", "Pop music charts", "Comedy specials Netflix", "Cultural events near me",
     
-
+    
     "Smart home devices 2025", "Wearable tech reviews", "Electric car prices", "AI innovations",
     "5G network updates", "Virtual reality headsets", "Drone technology", "Cybersecurity tips",
     "Tech startups 2025", "Cloud storage comparison", "Programming tutorials", "Data privacy laws",
     
-
+    
     "Local weather forecast", "Event planning ideas", "DIY craft projects", "Pet adoption near me",
     "Gardening for beginners", "Car maintenance tips", "Home renovation ideas", "Wedding planning guide",
     "Photography gear reviews", "Best coffee machines", "Restaurant reviews near me", "Online grocery delivery",
@@ -89,7 +90,7 @@ KEYWORDS_MOBILE = [
 
 class BingSearchAutomation:
     def __init__(self, device_type="pc", headless=False, driver_path="msedgedriver.exe", user_data_dir=None, mode="search"):
-
+       
         self.device_type = device_type
         self.headless = headless
         self.driver_path = driver_path
@@ -97,17 +98,17 @@ class BingSearchAutomation:
         self.mode = mode
         self.driver = None
         
-
+        
         self.keywords = self.load_keywords_from_file()
     
     def load_keywords_from_file(self):
-
+        
         keywords = []
         try:
             with open("1.txt", "r", encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
-
+                    
                     if line and not line.startswith("#"):
                         keywords.append(line)
             
@@ -125,6 +126,213 @@ class BingSearchAutomation:
         except Exception as e:
             print(f"读取1.txt文件时发生错误: {e}，将使用默认关键词库")
             return KEYWORDS_PC if self.device_type == "pc" else KEYWORDS_MOBILE
+    
+    def find_available_port(self):
+        
+        
+        
+        port_range = range(10000, 11001)
+        
+        
+        used_ports_file = os.path.join("1", "used_ports_rewards.json")
+        used_ports = {}
+        
+        try:
+            if os.path.exists(used_ports_file):
+                with open(used_ports_file, 'r', encoding='utf-8') as f:
+                    used_ports = json.load(f)
+        except Exception as e:
+            print(f"读取端口使用记录失败: {e}")
+        
+        
+        current_used_count = len(used_ports)
+        print(f"当前已记录使用端口数量: {current_used_count}")
+        
+        
+        if current_used_count < 300:
+            print("使用策略1：优先使用未记录过的端口")
+            
+            unused_ports = [port for port in port_range if str(port) not in used_ports]
+            if unused_ports:
+                random.shuffle(unused_ports)  
+                for port in unused_ports:
+                    if self._is_port_available(port):
+                        print(f"找到可用端口: {port}")
+                        self._record_port_usage(port)
+                        return port
+        
+        
+        else:
+            print("使用策略2：检查所有端口的实际占用情况")
+            
+            shuffled_ports = list(port_range)
+            random.shuffle(shuffled_ports)
+            
+            
+            current_time = time.time()
+            recent_ports = []
+            other_ports = []
+            
+            for port in shuffled_ports:
+                port_str = str(port)
+                if port_str in used_ports:
+                   
+                    if current_time - used_ports[port_str] < 1800: 
+                        recent_ports.append(port)
+                    else:
+                        other_ports.append(port)
+                else:
+                    other_ports.append(port)
+            
+            
+            for port in other_ports:
+                if self._is_port_available(port):
+                    print(f"找到可用端口: {port}")
+                    self._record_port_usage(port)
+                    return port
+            
+            
+            for port in recent_ports:
+                if self._is_port_available(port):
+                    print(f"找到可用端口: {port}")
+                    self._record_port_usage(port)
+                    return port
+        
+        
+        print("使用策略3：清理过期端口记录后重试")
+        self._clean_expired_ports()
+        
+        
+        try:
+            if os.path.exists(used_ports_file):
+                with open(used_ports_file, 'r', encoding='utf-8') as f:
+                    used_ports = json.load(f)
+        except Exception as e:
+            print(f"重新读取端口记录失败: {e}")
+        
+        
+        shuffled_ports = list(port_range)
+        random.shuffle(shuffled_ports)
+        
+        for port in shuffled_ports:
+            if self._is_port_available(port):
+                print(f"找到可用端口: {port}")
+                self._record_port_usage(port)
+                return port
+        
+       
+        print("警告：在10000-11000范围内未找到可用端口，尝试使用系统分配的随机端口")
+        return None
+    
+    def find_available_port_with_retry(self, max_retries=100):
+        
+        retry_count = 0
+        
+        while retry_count < max_retries:
+            try:
+                
+                port = self.find_available_port()
+                
+                if port is None:
+                    
+                    print(f"第{retry_count + 1}次重试：使用系统分配的随机端口")
+                    return 0  
+                
+                if self._is_port_available(port):
+                    print(f"端口 {port} 确认可用，启动浏览器")
+                    return port
+                else:
+                    print(f"端口 {port} 被占用，尝试其他端口...")
+                    retry_count += 1
+                    time.sleep(1) 
+                    
+            except Exception as e:
+                print(f"端口查找过程中发生错误: {e}")
+                retry_count += 1
+                time.sleep(1)
+        
+        
+        print(f"经过 {max_retries} 次重试后仍无法找到可用端口，使用系统分配的随机端口")
+        return 0
+    
+    def _is_port_available(self, port):
+        
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(1)  # 设置超时时间
+                result = s.connect_ex(('localhost', port))
+                return result != 0  # 端口可用
+        except Exception as e:
+            print(f"检查端口 {port} 时发生错误: {e}")
+            return False
+    
+    def _record_port_usage(self, port):
+        
+        import json
+        import os
+        
+        used_ports_file = os.path.join("1", "used_ports_rewards.json")
+        used_ports = {}
+        
+        try:
+            if os.path.exists(used_ports_file):
+                with open(used_ports_file, 'r', encoding='utf-8') as f:
+                    used_ports = json.load(f)
+        except Exception as e:
+            print(f"读取端口使用记录失败: {e}")
+        
+        
+        used_ports[str(port)] = time.time()
+        
+        
+        self._clean_expired_ports(max_records=200)
+        
+        try:
+            with open(used_ports_file, 'w', encoding='utf-8') as f:
+                json.dump(used_ports, f, indent=2)
+        except Exception as e:
+            print(f"保存端口使用记录失败: {e}")
+    
+    def _clean_expired_ports(self, max_records=200):
+        
+        import json
+        import os
+        
+        used_ports_file = os.path.join("1", "used_ports_rewards.json")
+        
+        try:
+            if os.path.exists(used_ports_file):
+                with open(used_ports_file, 'r', encoding='utf-8') as f:
+                    used_ports = json.load(f)
+                
+                
+                current_time = time.time()
+                expired_ports = []
+                
+                for port, timestamp in used_ports.items():
+                    if current_time - timestamp > 1800:  
+                        expired_ports.append(port)
+                
+                for port in expired_ports:
+                    del used_ports[port]
+                
+                if expired_ports:
+                    print(f"清理了 {len(expired_ports)} 个过期端口")
+                
+               
+                if len(used_ports) > max_records:
+                    
+                    sorted_ports = sorted(used_ports.items(), key=lambda x: x[1], reverse=True)
+                    removed_count = len(used_ports) - max_records
+                    used_ports = dict(sorted_ports[:max_records])
+                    print(f"清理了 {removed_count} 个最旧的端口记录，保留最新的 {max_records} 个记录")
+                
+                
+                with open(used_ports_file, 'w', encoding='utf-8') as f:
+                    json.dump(used_ports, f, indent=2)
+                    
+        except Exception as e:
+            print(f"清理过期端口失败: {e}")
         
     def setup_driver(self):
         
@@ -143,7 +351,7 @@ class BingSearchAutomation:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         
-        
+       
         user_data_dir = os.path.join(os.getcwd(), "1", "browser_data")
         options.add_argument(f"--user-data-dir={user_data_dir}")
         
@@ -151,7 +359,7 @@ class BingSearchAutomation:
         options.add_argument("--window-size=1200,800")
         options.add_argument("--window-position=100,100")
         
-        
+       
         user_agents = [
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
@@ -160,7 +368,7 @@ class BingSearchAutomation:
         ]
         options.add_argument(f"--user-agent={random.choice(user_agents)}")
         
-        
+      
         if self.device_type == "mobile":
             mobile_user_agents = [
                 "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36 EdgA/121.0.0.0",
@@ -174,10 +382,18 @@ class BingSearchAutomation:
                 "userAgent": mobile_user_agent
             })
         
-        service = Service(self.driver_path)
+       
+        port = self.find_available_port_with_retry(max_retries=3)
+        if port and port != 0:
+            print(f"使用端口 {port} 启动浏览器驱动")
+            service = Service(self.driver_path, port=port)
+        else:
+            print("使用系统分配的随机端口")
+            service = Service(self.driver_path)
+        
         self.driver = webdriver.Edge(service=service, options=options)
         
-        
+       
         self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
         self.driver.execute_script("Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]})")
         self.driver.execute_script("Object.defineProperty(navigator, 'languages', {get: () => ['zh-CN', 'zh', 'en']})")
@@ -188,36 +404,36 @@ class BingSearchAutomation:
         return self.driver
     
     def load_existing_cookies(self):
-       
+        
         try:
-            
+           
             cookie_files = glob.glob(os.path.join("1", "final_cookies_*.json"))
             
             if not cookie_files:
                 print("未找到Cookie文件，将创建新的会话")
                 return
             
-            
+           
             latest_cookie_file = max(cookie_files, key=os.path.getmtime)
             print(f"加载Cookie文件: {latest_cookie_file}")
             
-            
+           
             with open(latest_cookie_file, 'r', encoding='utf-8') as f:
                 cookies = json.load(f)
             
-            
+           
             self.driver.get("https://www.bing.com")
             
             
             for cookie in cookies:
                 try:
-                    
+                   
                     if 'name' in cookie and 'value' in cookie:
                         self.driver.add_cookie(cookie)
                 except Exception as e:
                     print(f"添加Cookie失败: {cookie.get('name', 'unknown')} - {e}")
             
-            
+           
             self.driver.refresh()
             
             print(f"成功加载 {len(cookies)} 个Cookie，登录状态已恢复")
@@ -226,7 +442,7 @@ class BingSearchAutomation:
             print(f"加载Cookie时发生错误: {e}")
     
     def simulate_human_scroll(self, continuous=False):
-        
+       
         try:
             
             page_height = self.driver.execute_script(
@@ -245,13 +461,12 @@ class BingSearchAutomation:
             
             print(f"页面高度: {page_height}px, 当前位置: {current_position}px, 视口高度: {viewport_height}px")
             
-            
+          
             target_position = max(0, page_height - viewport_height)
             
             if current_position >= target_position:
                 print("页面已经滚动到底部")
                 if continuous:
-                    
                     print("持续滑动模式：滚动回顶部重新开始")
                     
                     
@@ -268,7 +483,7 @@ class BingSearchAutomation:
                     
                     current_position = 0
                 else:
-                    
+                   
                     wait_time = 4 + random.uniform(1, 3)
                     print(f"直接等待{wait_time:.1f}秒")
                     time.sleep(wait_time)
@@ -289,7 +504,7 @@ class BingSearchAutomation:
                 
                 
                 const baseDuration = 1200; 
-                const distanceFactor = Math.min(distance / 800, 2.5); 
+                const distanceFactor = Math.min(distance / 800, 2.5);
                 const randomFactor = Math.random() * 0.3 + 0.85; 
                 const duration = (baseDuration + (distanceFactor * 300)) * randomFactor;
                 
@@ -326,12 +541,12 @@ class BingSearchAutomation:
                 
                 
                 base_wait_time = 2.0
-                wait_variation = random.uniform(0.3, 1.2)  
+                wait_variation = random.uniform(0.3, 1.2) 
                 wait_time = base_wait_time + wait_variation
                 print(f"手机端平滑滑动完成，等待{wait_time:.1f}秒...")
                 time.sleep(wait_time)
                 
-                
+               
                 max_attempts = 3
                 for attempt in range(max_attempts):
                     
@@ -357,12 +572,12 @@ class BingSearchAutomation:
                     print(f"  距离底部: {current_info['distanceToBottom']}px")
                     print(f"  是否到达底部: {'是' if current_info['isAtBottom'] else '否'}")
                     
-                    
+                   
                     if current_info['isAtBottom']:
                         print("✓ 成功滑动到页面底部")
                         break
                     
-                    
+                   
                     if attempt < max_attempts - 1:
                         print(f"未到达底部，使用备用方案 {attempt + 1}...")
                         
@@ -401,7 +616,7 @@ class BingSearchAutomation:
                                 self.driver.execute_script(f"window.scrollBy(0, {step_distance});")
                                 time.sleep(0.3 + random.uniform(0.1, 0.3))
                             
-                            
+                           
                             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);")
                             time.sleep(0.5)
                             print("备用方案3执行成功")
@@ -419,9 +634,9 @@ class BingSearchAutomation:
                 """)
                 
                 if final_verification:
-                    print("✓ 最终验证：成功到达页面底部")
+                    print("最终验证：成功到达页面底部")
                 else:
-                    print("⚠ 最终验证：可能未完全到达底部，但已尽力滑动")
+                    print("最终验证：可能未完全到达底部，但已尽力滑动")
                     
                     
                     final_info = self.driver.execute_script("""
@@ -443,10 +658,10 @@ class BingSearchAutomation:
                 const distance = targetY - startY;
                 
                 
-                const baseDuration = 1800;
+                const baseDuration = 1800; 
                 const distanceFactor = Math.min(distance / 1000, 3); 
                 const randomFactor = Math.random() * 0.4 + 0.8;
-                const duration = (baseDuration + (distanceFactor * 400)) * randomFactor;
+                const duration = (baseDuration + (distanceFactor * 400)) * randomFactor; 
                 
                 const startTime = performance.now();
                 
@@ -525,9 +740,9 @@ class BingSearchAutomation:
                 if attempt < max_attempts_pc - 1:
                     print(f"PC端未到达底部，使用备用方案 {attempt + 1}...")
                     
-                    
+                   
                     if attempt == 0:
-                        
+                       
                         try:
                             self.driver.execute_script("""
                                 window.scrollTo({
@@ -551,7 +766,7 @@ class BingSearchAutomation:
                     
                     print("PC端最后一次尝试：使用最可靠的滚动方案")
                     try:
-                        
+                       
                         remaining_distance = current_info['distanceToBottom']
                         steps = max(3, min(10, int(remaining_distance / 200)))
                         
@@ -567,7 +782,7 @@ class BingSearchAutomation:
                     except Exception as e3:
                         print(f"PC端备用方案3失败: {e3}")
             
-            
+           
             final_verification_pc = self.driver.execute_script("""
                 const scrollTop = (document.scrollingElement || document.documentElement).scrollTop || 0;
                 const scrollHeight = document.body.scrollHeight || document.documentElement.scrollHeight;
@@ -578,11 +793,11 @@ class BingSearchAutomation:
             """)
             
             if final_verification_pc:
-                print("✓ PC端最终验证：成功到达页面底部")
+                print("PC端最终验证：成功到达页面底部")
             else:
-                print("⚠ PC端最终验证：可能未完全到达底部，但已尽力滑动")
+                print("PC端最终验证：可能未完全到达底部，但已尽力滑动")
                 
-                
+               
                 final_info_pc = self.driver.execute_script("""
                     return {
                         scrollTop: (document.scrollingElement || document.documentElement).scrollTop || 0,
@@ -615,7 +830,7 @@ class BingSearchAutomation:
         except Exception as e:
             print(f"滑动时发生错误: {e}")
             
-            
+           
             error_type = type(e).__name__
             print(f"错误类型: {error_type}")
             
@@ -656,7 +871,7 @@ class BingSearchAutomation:
                     steps = 20 if self.device_type == "pc" else 15
                     for i in range(steps):
                         try:
-                            
+                           
                             scroll_distance = 100 + (i * 15)
                             self.driver.execute_script(f"window.scrollBy(0, {scroll_distance});")
                             time.sleep(0.1)
@@ -686,7 +901,7 @@ class BingSearchAutomation:
                 except Exception as e4:
                     print(f"方案4失败: {e4}")
             
-           
+            
             if not backup_success:
                 try:
                     print("尝试方案5：简单滚动")
@@ -698,7 +913,7 @@ class BingSearchAutomation:
                 except Exception as e5:
                     print(f"方案5失败: {e5}")
             
-            
+           
             if not backup_success:
                 try:
                     print("所有备用方案都失败，尝试刷新页面")
@@ -718,7 +933,7 @@ class BingSearchAutomation:
             print("备用方案执行完成")
     
     def bing_search(self, query):
-        
+      
         try:
            
             self.driver.get("https://www.bing.com")
@@ -727,27 +942,27 @@ class BingSearchAutomation:
             wait_time = 2 + random.uniform(0.5, 2.0)
             time.sleep(wait_time)
             
-            
+           
             search_box = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.NAME, "q"))
             )
             
-            
+          
             search_box.click()
             time.sleep(random.uniform(0.2, 0.5))
             
-            
+          
             search_box.clear()
             time.sleep(random.uniform(0.1, 0.3))
             
-           
+            
             for i, char in enumerate(query):
                 search_box.send_keys(char)
                 
+               
+                delay = random.uniform(0.08, 0.25)  
                 
-                delay = random.uniform(0.08, 0.25) 
-                
-                
+              
                 if random.random() < 0.05 and i > 2: 
                     search_box.send_keys(Keys.BACKSPACE)
                     time.sleep(random.uniform(0.1, 0.3))
@@ -760,8 +975,8 @@ class BingSearchAutomation:
             think_time = random.uniform(0.5, 2.5)
             time.sleep(think_time)
             
-            
-            if random.random() < 0.3:  
+          
+            if random.random() < 0.3: 
                 try:
                     search_button = self.driver.find_element(By.ID, "search_icon")
                     search_button.click()
@@ -770,14 +985,14 @@ class BingSearchAutomation:
             else:
                 search_box.send_keys(Keys.RETURN)
             
-           
+          
             WebDriverWait(self.driver, 15).until(
                 EC.presence_of_element_located((By.ID, "b_results"))
             )
             
             print(f"搜索完成: {query}")
             
-           
+            
             self.simulate_human_scroll(continuous=False)
             
             return True
@@ -818,7 +1033,7 @@ class BingSearchAutomation:
             return successful_searches
     
     def close(self):
-        
+       
         if self.driver:
             self.driver.quit()
 
@@ -847,7 +1062,7 @@ def main():
        
         automation.setup_driver()
         
-       
+        
         successful_searches = automation.run_searches(args.count)
         
         print(f"\n任务完成！设备类型: {args.device.upper()}")
