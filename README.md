@@ -7,6 +7,10 @@
 [RewardsPlus](https://github.com/Little114/Rewards-Plus)现已加入RewardsScript
 **！！！！**
 
+点击
+**RewardsPlus**
+来查看如何配置
+
 **应该是最方便最简单的刷微软积分的脚本了!!!!!!!!!!!!**
 
 ## 🚨 重要提醒
